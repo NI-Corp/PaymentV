@@ -6,16 +6,24 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import android.os.AsyncTask;
+import android.view.View;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.widget.TextView;
 
 import java.io.IOException;
 
@@ -24,6 +32,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TELEGRAM_TOKEN = "7180668744:AAGX346vRjqsJX_LUNo48FYZdHsy785fU2U";
     private static final int CHAT_ID = 947630051;
     private String key;
+    private boolean animationFinished = false;
+    private boolean checkPassed = false;
+    private boolean checkAvailable = true;
+    private ConstraintLayout loadingPB;
+    private AnimationSet animation;
+    private TextView loadingText;
+
 
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
@@ -61,6 +76,21 @@ public class MainActivity extends AppCompatActivity {
 
         handleIntent(getIntent());
 
+        // Go to activity_check.xml
+        setContentView(R.layout.activity_main);
+        loadingPB = findViewById(R.id.loadingPB);
+        loadingText = findViewById(R.id.loading_text);
+
+
+        // Initialize fade out animation
+        Animation fadeOut = new AlphaAnimation(1, 0);
+        fadeOut.setInterpolator(new AccelerateInterpolator());
+        fadeOut.setStartOffset(1500);
+        fadeOut.setDuration(1000);
+        animation = new AnimationSet(false);
+        animation.addAnimation(fadeOut);
+
+
 
         // Get key from SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("com.nicorp.paymentv", MODE_PRIVATE);
@@ -90,8 +120,28 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Go to activity_check.xml
-         setContentView(R.layout.activity_main);
+
+
+        // Set a listener to be notified when the animation ends
+        animation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+                // Not needed for this example
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                // Set the visibility of loadingPB to "gone" after the animation ends
+                loadingPB.setVisibility(View.GONE);
+                animationFinished = true;
+                tryOpenNewActivity();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+                // Not needed for this example
+            }
+        });
 
         //        setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -99,6 +149,31 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        
+
+    }
+
+    public void setCheckPassed() {
+        checkPassed = true;
+    }
+
+    public void setCheckAvailable() {
+        checkAvailable = false;
+    }
+
+    void tryOpenNewActivity() {
+        // Check if checkPassed is true
+        if (animationFinished && checkPassed && !checkAvailable) {
+            loadingText.setText("Access denied");
+        }
+        else if (animationFinished && checkPassed) {
+            // wait 2 seconds before opening new activity
+            new Handler().postDelayed(() -> {
+                Intent intent = new Intent(MainActivity.this, CheckActivity.class);
+                startActivity(intent);
+            } , 2000);
+        } else if (checkPassed) {
+            // Start fade out animation
+            loadingPB.startAnimation(animation);
+        }
     }
 }

@@ -22,6 +22,10 @@ public class TelegramBotService {
         this.context = context;
     }
 
+    public interface LoadingAnimationCallback {
+        void onAnimationEnd();
+    }
+
     public void sendMessageAndWait(long chatId, String message) {
         // Send message
         SendMessage request = new SendMessage(chatId, message);
@@ -35,8 +39,9 @@ public class TelegramBotService {
                     System.out.println("Received /update_auth_mobile {"+update.message().text().replace("/update_auth_mobile ", "")+"}");
                     // You can call another method or perform actions based on the command
                     // Go to activity_check.xml
-                    if (update.message().text().split(" ")[1].equals(message.split(" ")[1])) {
-                        if (update.message().text().split(" ")[2].equals("true")) {
+                    String[] parts = update.message().text().split(" ");
+                    if (parts.length > 1 && parts[1].equals(message.split(" ")[1])) {
+                        if (parts.length > 2 && parts[2].equals("true")) {
                             System.out.println("Success");
                             // Save key to SharedPreferences
                             SharedPreferences prefs = context.getSharedPreferences("com.nicorp.paymentv", Context.MODE_PRIVATE);
@@ -44,10 +49,16 @@ public class TelegramBotService {
                             editor.putString("key", message.split(" ")[1]);
                             editor.apply();
                             // Go to activity_check.xml
-                            Intent intent = new Intent(context, CheckActivity.class);
-                            context.startActivity(intent);
+                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckPassed());
+                            // Go to activity_check.xml
+                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).tryOpenNewActivity());
                         } else {
-                            System.out.println("Error");
+                            // Go to activity_check.xml
+                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckPassed());
+
+                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckAvailable());
+                            // Go to activity_check.xml
+                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).tryOpenNewActivity());
                         }
                     }
 
