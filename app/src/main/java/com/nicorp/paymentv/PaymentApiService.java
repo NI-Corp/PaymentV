@@ -1,5 +1,6 @@
 package com.nicorp.paymentv;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -37,6 +38,7 @@ public class PaymentApiService {
         new OrderStatusTaskQR(listener).execute(orderId);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private class OrderStatusTask extends AsyncTask<String, Void, String> {
         private final OnOrderStatusReceivedListener listener;
 
