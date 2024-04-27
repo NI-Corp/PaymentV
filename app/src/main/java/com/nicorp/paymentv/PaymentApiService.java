@@ -33,6 +33,9 @@ public class PaymentApiService {
     public void getOrderDataAsync(String orderId, OnOrderStatusReceivedListener listener) {
         new OrderStatusTask(listener).execute(orderId);
     }
+    public void getOrderDataQRAsync(String orderId, OnOrderStatusQRReceivedListener listener) {
+        new OrderStatusTaskQR(listener).execute(orderId);
+    }
 
     private class OrderStatusTask extends AsyncTask<String, Void, String> {
         private final OnOrderStatusReceivedListener listener;
@@ -97,7 +100,59 @@ public class PaymentApiService {
         }
     }
 
+    private class OrderStatusTaskQR extends AsyncTask<String, Void, String> {
+        private final OnOrderStatusQRReceivedListener listener;
+
+        public OrderStatusTaskQR(OnOrderStatusQRReceivedListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+            String orderQR = params[0];
+            try {
+
+                String apiUrl = "https://pay-test.raif.ru/api/sbp/v2/qrs/" + orderQR;
+                URL url = new URL(apiUrl);
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+                // Добавляем заголовок Authorization
+                urlConnection.setRequestProperty("Authorization", "Bearer " + secretKey);
+
+                StringBuilder response = new StringBuilder();
+                response.setLength(0);
+                try (BufferedReader in = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        response.append(line);
+                    }
+                }
+
+                JSONObject jsonResponse = new JSONObject(response.toString());
+                String orderStatus = jsonResponse.getString("qrStatus");
+
+                return orderStatus;
+            } catch (IOException | JSONException e) {
+                Log.e("Error", "Exception: " + e.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if (listener != null) {
+                listener.onOrderStatusQRReceived(result);
+            }
+        }
+    }
+
+
     public interface OnOrderStatusReceivedListener {
         void onOrderStatusReceived(String status);
+    }
+
+    public interface OnOrderStatusQRReceivedListener {
+        void onOrderStatusQRReceived(String status);
     }
 }

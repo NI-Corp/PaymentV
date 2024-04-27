@@ -39,13 +39,14 @@
 
         <EditText
             android:id="@+id/code_edit_text"
-            android:layout_width="300dp"
+            android:layout_width="250dp"
             android:layout_height="50dp"
             android:layout_marginTop="30dp"
             android:background="@drawable/edit_text_back"
             android:inputType="text"
             android:paddingLeft="10dp"
             android:text="Name"
+            android:textColor="#2B2D33"
             android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -64,7 +65,7 @@
 
         <ImageView
             android:id="@+id/check_button"
-            android:layout_width="300dp"
+            android:layout_width="250dp"
             android:layout_height="50dp"
             android:layout_marginTop="30dp"
             android:allowClickWhenDisabled="true"
@@ -75,14 +76,23 @@
             app:layout_constraintTop_toBottomOf="@+id/code_edit_text"
             app:srcCompat="@drawable/check_btn" />
 
+        <ImageView
+            android:id="@+id/qr_button"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="30dp"
+            app:layout_constraintStart_toEndOf="@+id/code_edit_text"
+            app:layout_constraintTop_toBottomOf="@+id/textView2"
+            app:srcCompat="@drawable/ic_launcher_foreground" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/check_status"
         android:layout_width="200dp"
-        android:layout_height="70dp"
+        android:layout_height="50dp"
         android:layout_marginTop="100dp"
-        android:background="@drawable/check_ok_back"
         android:alpha="1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
@@ -91,7 +101,6 @@
             android:id="@+id/check_status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Оплачен"
             android:textColor="#FEFEFE"
             android:textSize="24sp"
             android:textStyle="bold"

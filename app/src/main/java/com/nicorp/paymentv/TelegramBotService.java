@@ -5,6 +5,7 @@ import static androidx.core.content.ContextCompat.startActivity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.pengrad.telegrambot.TelegramBot;
 import com.pengrad.telegrambot.TelegramBot;
@@ -35,33 +36,46 @@ public class TelegramBotService {
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
                 if (update.message() != null && update.message().text().contains("/update_auth_mobile")) {
-                    // Handle the command here
-                    System.out.println("Received /update_auth_mobile {"+update.message().text().replace("/update_auth_mobile ", "")+"}");
-                    // You can call another method or perform actions based on the command
-                    // Go to activity_check.xml
-                    String[] parts = update.message().text().split(" ");
-                    if (parts.length > 1 && parts[1].equals(message.split(" ")[1])) {
-                        if (parts.length > 2 && parts[2].equals("true")) {
-                            System.out.println("Success");
-                            // Save key to SharedPreferences
-                            SharedPreferences prefs = context.getSharedPreferences("com.nicorp.paymentv", Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = prefs.edit();
-                            editor.putString("key", message.split(" ")[1]);
-                            editor.apply();
-                            // Go to activity_check.xml
-                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckPassed());
-                            // Go to activity_check.xml
-                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).tryOpenNewActivity());
-                        } else {
-                            // Go to activity_check.xml
-                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckPassed());
+                    // Check that time of the message is not older than 1 minute
+                    long timeDiff = (System.currentTimeMillis() - update.message().date() * 1000L) / 1000L;
+                    if (timeDiff < 15) {
+                        Log.d("TelegramBot", "Received message: " + update.message().text());
+                        // Handle the command here
+                        System.out.println("Received /update_auth_mobile {"+update.message().text().replace("/update_auth_mobile ", "")+"}");
+                        // You can call another method or perform actions based on the command
+                        // Go to activity_check.xml
+                        String[] parts = update.message().text().split(" ");
+                        if (parts.length > 1 && parts[1].equals(message.split(" ")[1])) {
+                            if (parts.length > 2 && parts[2].equals("true")) {
+                                System.out.println("Success");
+                                // Save key to SharedPreferences
+                                SharedPreferences prefs = context.getSharedPreferences("com.nicorp.paymentv", Context.MODE_PRIVATE);
+                                SharedPreferences.Editor editor = prefs.edit();
+                                editor.putString("key", message.split(" ")[1]);
+                                editor.apply();
+                                // Go to activity_check.xml
+                                ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckPassed());
+                                // Go to activity_check.xml
+                                ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).tryOpenNewActivity());
+                                bot.shutdown();
+                                bot.removeGetUpdatesListener();
+                            } else {
+                                // Go to activity_check.xml
+                                ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckPassed());
 
-                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckAvailable());
-                            // Go to activity_check.xml
-                            ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).tryOpenNewActivity());
+                                ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).setCheckAvailable());
+                                // Go to activity_check.xml
+                                ((MainActivity) context).runOnUiThread(() -> ((MainActivity) context).tryOpenNewActivity());
+                                bot.shutdown();
+                                bot.removeGetUpdatesListener();
+
+                            }
+
+                        bot.shutdown();
+                        bot.removeGetUpdatesListener();
+
                         }
                     }
-
                     return UpdatesListener.CONFIRMED_UPDATES_ALL;
                 }
             }

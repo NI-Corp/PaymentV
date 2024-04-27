@@ -23,6 +23,7 @@ import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -30,7 +31,7 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TELEGRAM_TOKEN = "7180668744:AAGX346vRjqsJX_LUNo48FYZdHsy785fU2U";
-    private static final int CHAT_ID = 947630051;
+    private static final long CHAT_ID = -4195683880L;
     private String key;
     private boolean animationFinished = false;
     private boolean checkPassed = false;
@@ -80,6 +81,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         loadingPB = findViewById(R.id.loadingPB);
         loadingText = findViewById(R.id.loading_text);
+
 
 
         // Initialize fade out animation
