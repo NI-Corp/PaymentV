@@ -1,6 +1,8 @@
 package com.nicorp.paymentv;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,27 +15,44 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import android.os.AsyncTask;
+
+import java.io.IOException;
+
 public class MainActivity extends AppCompatActivity {
+
+    private static final String TELEGRAM_TOKEN = "7180668744:AAGX346vRjqsJX_LUNo48FYZdHsy785fU2U";
+    private static final int CHAT_ID = 947630051;
+    private String key;
 
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         handleIntent(intent);
     }
 
+    @SuppressLint("StaticFieldLeak")
     private void handleIntent(Intent intent) {
         String appLinkAction = intent.getAction();
         Uri appLinkData = intent.getData();
         Log.d("AppLinkAction", String.valueOf(appLinkData));
-//        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
-//            String recipeId = appLinkData.getLastPathSegment();
-//            Uri appData = Uri.parse("content://com.recipe_app/recipe/").buildUpon()
-//                    .appendPath(recipeId).build();
-//            Log.d("AppData", String.valueOf(appData));
-//        }
+        if (Intent.ACTION_VIEW.equals(appLinkAction) && appLinkData != null){
+            Log.d("AppData", String.valueOf(appLinkData));
+            // Get key from appLinkData https://paymentv.netlify.app/main?key=12345678
+            key = appLinkData.getQueryParameter("key");
+            Log.d("Key", key);
+
+            TelegramBotService botService = new TelegramBotService(TELEGRAM_TOKEN, this);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    botService.sendMessageAndWait(CHAT_ID, "/check_auth_mobile " + key);
+                    return null;
+                }
+            }.execute();
+        }
     }
 
-
-
+    @SuppressLint("StaticFieldLeak")
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +60,22 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
 
         handleIntent(getIntent());
+
+
+        // Get key from SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("com.nicorp.paymentv", MODE_PRIVATE);
+        String sharedKey = sharedPreferences.getString("key", null);
+        System.out.println("Shared key: " + sharedKey);
+        if (sharedKey != null && key == null) {
+            TelegramBotService botService = new TelegramBotService(TELEGRAM_TOKEN, this);
+            new AsyncTask<Void, Void, Void>() {
+                @Override
+                protected Void doInBackground(Void... voids) {
+                    botService.sendMessageAndWait(CHAT_ID, "/check_auth_mobile " + sharedKey);
+                    return null;
+                }
+            }.execute();
+        }
 
         // Создаем экземпляр PaymentApiService
         PaymentApiService paymentApiService = PaymentApiService.getInstance();
@@ -56,46 +91,14 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Go to activity_check.xml
-         setContentView(R.layout.activity_check);
+         setContentView(R.layout.activity_main);
 
-//        setContentView(R.layout.activity_main);
+        //        setContentView(R.layout.activity_main);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-
-//        String secretKey = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJNQTYyMjk3NiIsImp0aSI6ImI1OTNkODRkLTk1MWYtNGIyZi05ZGViLTcxOWExNDM4NWVmZCJ9.si-87k3Aw5GN67orgJpoyTXC0C2OpWwRCKzLogRWawU"; // change this to your secretKey
-//        String sbpMerchantId = "MA622976"; // change this to your sbpMerchantId
-//        SbpClient client = new SbpClient(SbpClient.TEST_URL, sbpMerchantId, secretKey);
-//        try {
-//            String order = QRUtil.generateOrderNumber();
-//            // save order in a database;
-//            QR qrCode = new QRDynamic(order, new BigDecimal(100));
-//            qrCode.setAccount("40700000000000000000");
-//            qrCode.setAdditionalInfo("Доп информация");
-//            qrCode.setPaymentDetails("Назначение платежа");
-//            qrCode.setQrExpirationDate(ZonedDateTime.now().plusDays(1));
-//            QRUrl response = client.registerQR(qrCode);
-//            Log.d("response", response.getQrId());
-//            //response.getOrUrl();
-//            Log.d("response", response.getPayload());
-//        }
-//        catch (IOException networkException) {
-//            networkException.getMessage();
-//        }
-//        catch (SbpException sbpException) {
-//            sbpException.getCode(); // Error id
-//            sbpException.getMessage();
-//        }
-//        catch (ContractViolationException contractException) {
-//            contractException.getHttpCode();
-//            contractException.getMessage();
-//        } catch (URISyntaxException e) {
-//            throw new RuntimeException(e);
-//        } catch (InterruptedException e) {
-//            throw new RuntimeException(e);
-//        }
+        
     }
 }

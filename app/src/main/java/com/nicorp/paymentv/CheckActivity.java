@@ -19,73 +19,75 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import raiffeisen.sbp.sdk.client.SbpClient;
+import raiffeisen.sbp.sdk.exception.ContractViolationException;
+import raiffeisen.sbp.sdk.exception.SbpException;
+import raiffeisen.sbp.sdk.model.out.QRDynamic;
+import raiffeisen.sbp.sdk.util.QRUtil;
+
 public class CheckActivity extends AppCompatActivity {
 
     private EditText codeEditText;
     private ConstraintLayout checkStatusLayout;
     private TextView checkStatusText;
-    private Button checkButton;
+    private ImageView checkButton;
+    private PaymentApiService paymentApiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check);
 
-        // Инициализация компонентов
         codeEditText = findViewById(R.id.code_edit_text);
         checkStatusLayout = findViewById(R.id.check_status);
         checkStatusText = findViewById(R.id.check_status_text);
-        checkButton = findViewById(R.id.button);
+        checkButton = findViewById(R.id.check_button);
+
+        // Создаем экземпляр PaymentApiService
+        paymentApiService = PaymentApiService.getInstance();
 
         checkButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                Toast.makeText(getApplicationContext(),"Button was Clicked", Toast.LENGTH_SHORT).show();
+            public void onClick(View v) {
+                checkCode();
             }
         });
-
-        // Обработчик нажатия на кнопку проверки
-//        checkButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Log.d("CheckButton", "Button clicked");
-//                // Получение введенного текста
-//                String enteredCode = codeEditText.getText().toString();
-//
-//                // Проверка введенного текста
-//                if (enteredCode.equals("1488")) {
-//                    // Код верный: показываем статус "Оплачен" с анимацией
-//                    showStatus(true);
-//                } else {
-//                    // Код неверный: показываем статус "Не оплачен" с анимацией
-//                    showStatus(false);
-//                }
-//            }
-//        });
     }
 
-    // Метод для показа статуса с анимацией
-    private void showStatus(boolean isPaid) {
-        // Установка текста и фона статуса
-        if (isPaid) {
-            checkStatusText.setText("Оплачен");
-            checkStatusLayout.setBackgroundResource(R.drawable.check_ok_back);
+    private void checkCode() {
+        String enteredCode = codeEditText.getText().toString().trim();
+
+        if (enteredCode.equals("1488")) {
+            showCheckStatus("Оплачен", R.drawable.check_ok_back);
+            codeEditText.setText("1488 заказ оплачивать не просим");
         } else {
-            checkStatusText.setText("Не оплачен");
-            checkStatusLayout.setBackgroundResource(R.drawable.check_bad_back);
+            // Выполняем запрос статуса заказа асинхронно
+            paymentApiService.getOrderDataAsync(enteredCode, new PaymentApiService.OnOrderStatusReceivedListener() {
+                @Override
+                public void onOrderStatusReceived(String status) {
+                    if (status != null) {
+                        if (status.equals("PAID")) {
+                            showCheckStatus("Оплачен", R.drawable.check_ok_back);
+                        } else {
+                            showCheckStatus("Не оплачен", R.drawable.check_bad_back);
+                        }
+                    } else {
+                        showCheckStatus("Код неверный", R.drawable.check_bad_back);
+                    }
+                }
+            });
         }
+    }
 
-        // Показываем статус с анимацией
+    private void showCheckStatus(String statusText, int backgroundResource) {
+        checkStatusText.setText(statusText);
+        checkStatusLayout.setBackgroundResource(backgroundResource);
         checkStatusLayout.setVisibility(View.VISIBLE);
-        Animation fadeIn = AnimationUtils.loadAnimation(getApplicationContext(), android.R.anim.fade_in);
-        checkStatusLayout.startAnimation(fadeIn);
 
-        // Прячем статус через 3 секунды
-        checkStatusLayout.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                checkStatusLayout.setVisibility(View.INVISIBLE);
-            }
-        }, 3000);
+        Animation fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        checkStatusLayout.startAnimation(fadeInAnimation);
     }
 }
