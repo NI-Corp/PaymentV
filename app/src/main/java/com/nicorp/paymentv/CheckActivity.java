@@ -35,7 +35,7 @@ public class CheckActivity extends AppCompatActivity {
     private EditText codeEditText;
     private ConstraintLayout checkStatusLayout;
     private TextView checkStatusText;
-    private ImageView checkButton;
+    private ConstraintLayout checkButton;
     private PaymentApiService paymentApiService;
 
     @Override

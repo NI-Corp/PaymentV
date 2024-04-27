@@ -31,7 +31,7 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TELEGRAM_TOKEN = "7180668744:AAGX346vRjqsJX_LUNo48FYZdHsy785fU2U";
-    private static final long CHAT_ID = -4195683880L;
+    private static final long CHAT_ID = -1002034395868L;
     private String key;
     private boolean animationFinished = false;
     private boolean checkPassed = false;

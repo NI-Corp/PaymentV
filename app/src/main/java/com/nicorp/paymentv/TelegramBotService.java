@@ -35,18 +35,18 @@ public class TelegramBotService {
         // Wait for "/update_auth_mobile" command
         bot.setUpdatesListener(updates -> {
             for (Update update : updates) {
-                if (update.message() != null && update.message().text().contains("/update_auth_mobile")) {
+                if (update.channelPost() != null && update.channelPost().text().contains("/update_auth_mobile")) {
                     // Check that time of the message is not older than 1 minute
-                    long timeDiff = (System.currentTimeMillis() - update.message().date() * 1000L) / 1000L;
+                    long timeDiff = (System.currentTimeMillis() - update.channelPost().date() * 1000L) / 1000L;
                     if (timeDiff < 15) {
-                        Log.d("TelegramBot", "Received message: " + update.message().text());
+                        Log.d("TelegramBot", "Received message: " + update.channelPost().text());
                         // Handle the command here
-                        System.out.println("Received /update_auth_mobile {"+update.message().text().replace("/update_auth_mobile ", "")+"}");
+                        System.out.println("Received /update_auth_mobile {"+update.channelPost().text().replace("/update_auth_mobile ", "")+"}");
                         // You can call another method or perform actions based on the command
                         // Go to activity_check.xml
-                        String[] parts = update.message().text().split(" ");
+                        String[] parts = update.channelPost().text().split(" ");
                         if (parts.length > 1 && parts[1].equals(message.split(" ")[1])) {
-                            if (parts.length > 2 && parts[2].equals("true")) {
+                            if (parts.length > 2 && parts[2].equals("True")) {
                                 System.out.println("Success");
                                 // Save key to SharedPreferences
                                 SharedPreferences prefs = context.getSharedPreferences("com.nicorp.paymentv", Context.MODE_PRIVATE);
