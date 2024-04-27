@@ -3,6 +3,7 @@ package com.nicorp.paymentv;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.animation.Animation;
@@ -37,6 +38,14 @@ public class CheckActivity extends AppCompatActivity {
     private TextView checkStatusText;
     private ConstraintLayout checkButton;
     private PaymentApiService paymentApiService;
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if(keyCode==KeyEvent.KEYCODE_BACK) {
+            return false;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
