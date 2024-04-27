@@ -163,10 +163,11 @@ public class MainActivity extends AppCompatActivity {
     void tryOpenNewActivity() {
         // Check if checkPassed is true
         if (animationFinished && checkPassed && !checkAvailable) {
-            loadingText.setText("Access denied");
+            loadingText.setText("У вас нет доступа к приложению");
         }
         else if (animationFinished && checkPassed) {
             // wait 2 seconds before opening new activity
+            loadingText.setText("Добрый день");
             new Handler().postDelayed(() -> {
                 Intent intent = new Intent(MainActivity.this, CheckActivity.class);
                 startActivity(intent);
