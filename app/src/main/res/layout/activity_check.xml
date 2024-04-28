@@ -33,6 +33,7 @@
         android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="-100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="0dp">
@@ -69,12 +70,12 @@
             android:layout_height="50dp"
             android:layout_marginTop="30dp"
             android:allowClickWhenDisabled="true"
+            android:background="@drawable/check_button_back"
             android:clickable="true"
             android:scaleType="fitXY"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/code_edit_text"
-            android:background="@drawable/check_button_back">
+            app:layout_constraintTop_toBottomOf="@+id/code_edit_text">
 
 
             <TextView
@@ -106,10 +107,10 @@
         android:id="@+id/check_status"
         android:layout_width="200dp"
         android:layout_height="50dp"
-        android:layout_marginTop="100dp"
+        android:layout_marginTop="5dp"
         android:alpha="1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraintLayout">
+        app:layout_constraintTop_toTopOf="@+id/constraintLayout">
 
         <TextView
             android:id="@+id/check_status_text"
